@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/klover2/qbit-go-sdk/core"
+	"github.com/klover2/qbit-go-sdk/client"
 )
 
 func main() {
@@ -27,7 +27,7 @@ func main() {
 	// fmt.Println(utils.Sign(utils.JoinStr(params), "25d55ad283aa400af464c76d713c07ad"))
 	// => 8287d5539c03918c9de51176162c2bf7065d5a8756b014e3293be1920c20d102
 
-	client := core.NewClient("qbit1f6efee44ceb8ca2", "8f70d42a1393802aebf567be27a47879")
+	client := client.NewClient("qbit1f6efee44ceb8ca2", "8f70d42a1393802aebf567be27a47879")
 
 	client.SetBaseUrl("http://127.0.0.1:3000")
 
