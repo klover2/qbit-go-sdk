@@ -29,7 +29,9 @@ go mod init
 #### 2、无需 clone 仓库中的代码，直接在项目目录中执行：
 
 ```shell
-go get -u github.com/klover2/qbit-go-sdk
+go get github.com/klover2/qbit-go-sdk
+
+go mod vendor # 把代码下载到当前项目中
 ```
 
 来添加依赖，完成 `go.mod` 修改与 SDK 下载。

@@ -42,13 +42,13 @@ type RefreshAccessTokenOutput struct {
 	Timestamp   int    `json:"timestamp"`
 }
 
-// NewRequestService 初始化service
+// NewAuthService 初始化service
 func NewAuthService(clientId string, clientSecret string, baseUrl string) *AuthService {
 	svc := &AuthService{client: client.NewClient(), clientId: clientId, clientSecret: clientSecret, baseUrl: baseUrl}
 	return svc
 }
 
-// 获取code
+// GetCode 获取code
 func (s *AuthService) GetCode(state string, redirectUri string) (GetCodeOutput, error) {
 	url := s.baseUrl + "/open-api/oauth/authorize"
 	query := map[string]interface{}{
@@ -80,7 +80,7 @@ func (s *AuthService) GetCode(state string, redirectUri string) (GetCodeOutput, 
 	}
 }
 
-// 获取access token
+// GetAccessToken 获取access token
 func (s *AuthService) GetAccessToken(code string) (GetAccessTokenOutput, error) {
 	url := s.baseUrl + "/open-api/oauth/access-token"
 	body := map[string]interface{}{
@@ -102,7 +102,7 @@ func (s *AuthService) GetAccessToken(code string) (GetAccessTokenOutput, error) 
 
 }
 
-// 刷新access token
+// RefreshToken 刷新access token
 func (s *AuthService) RefreshToken(refreshToken string) (RefreshAccessTokenOutput, error) {
 	url := s.baseUrl + "/open-api/oauth/refresh-token"
 	body := map[string]interface{}{
