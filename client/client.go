@@ -9,28 +9,25 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/klover2/qbit-go-sdk/utils"
 )
 
 /*Client HTTP客户端*/
 type Client struct {
-	httpClient   *http.Client
-	clientId     string
-	clientSecret string
+	httpClient *http.Client
 }
 
 // APIResult  请求结果
 type APIResult struct {
-	StatusCode int
-	Status     string
-	Content    string
+	Status  int
+	Reason  string
+	Content string
 }
 
 /*NewClient 新建http客户端*/
-func NewClient(clientId string, clientSecret string) *Client {
-	client := &Client{
-		clientId:     clientId,
-		clientSecret: clientSecret,
-	}
+func NewClient() *Client {
+	client := &Client{}
 
 	if client.httpClient == nil {
 		client.httpClient = &http.Client{
@@ -42,8 +39,24 @@ func NewClient(clientId string, clientSecret string) *Client {
 }
 
 // Get 发送一个 HTTP Get 请求
-func (client *Client) Get(requestURL string, header http.Header) (*APIResult, error) {
-	return client.doRequest(http.MethodGet, requestURL, nil, header)
+func (client *Client) Get(requestURL string, query map[string]interface{}, header http.Header) (*APIResult, error) {
+	var queryStr string = ""
+
+	for k, v := range query {
+		if queryStr == "" {
+			queryStr = queryStr + k + "=" + utils.ToStr(v)
+		} else {
+			queryStr = queryStr + "&" + k + "=" + utils.ToStr(v)
+		}
+	}
+
+	if queryStr != "" {
+		queryStr = "?" + queryStr
+	}
+
+	url := requestURL + queryStr
+
+	return client.doRequest(http.MethodGet, url, nil, header)
 }
 
 // Post 发送一个 HTTP Post 请求
@@ -70,6 +83,7 @@ func (client *Client) Delete(requestURL string, requestBody interface{}, header 
 func (client *Client) requestWithJSONBody(method, requestURL string, body interface{}, header http.Header) (
 	*APIResult, error,
 ) {
+
 	var (
 		reqBody *strings.Reader
 	)
@@ -84,7 +98,7 @@ func (client *Client) requestWithJSONBody(method, requestURL string, body interf
 		if stringBody, ok = body.(string); ok == false {
 			dataType, err := json.Marshal(body)
 
-			if err == nil {
+			if err != nil {
 				return nil, err
 			}
 			stringBody = string(dataType)
@@ -144,9 +158,9 @@ func dealResponse(response *http.Response) (*APIResult, error) {
 	response.Body = ioutil.NopCloser(bytes.NewBuffer(slurp))
 
 	res := &APIResult{
-		StatusCode: response.StatusCode,
-		Status:     strings.TrimSpace(strings.Replace(response.Status, "200", "", -1)),
-		Content:    string(slurp),
+		Status:  response.StatusCode,
+		Reason:  strings.TrimSpace(strings.Replace(response.Status, utils.ToStr(response.StatusCode), "", -1)),
+		Content: string(slurp),
 	}
 
 	return res, nil

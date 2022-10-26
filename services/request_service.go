@@ -1,56 +1,137 @@
 package services
 
 import (
+	"encoding/json"
+	"net/http"
+
 	"github.com/klover2/qbit-go-sdk/client"
 )
 
-type RequestService Service
+type RequestService struct {
+	client      *client.Client
+	accessToken string
+}
+
+type ContentOutput struct {
+	Code    int         `json:"code"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data"`
+}
+type Output struct {
+	Status  int           `json:"status"`
+	Reason  string        `json:"reason"`
+	Content ContentOutput `json:"content"`
+}
 
 // NewRequestService 初始化service
-func (s RequestService) NewRequestService(clientId string, clientSecret string) *RequestService {
-	return &RequestService{Client: client.NewClient(clientId, clientSecret)}
+func NewRequestService() *RequestService {
+	return &RequestService{client: client.NewClient()}
 }
 
-// GetBaseUrl 获取客户端baseUrl
-//func (s RequestService) GetBaseUrl() string {
-//	return s.baseUrl
-//}
-
-// SetBaseUrl 设置客户端baseUrl
-//func (s RequestService) SetBaseUrl(baseUrl string) {
-//	s.baseUrl = baseUrl
-//}
-
-func (s RequestService) PostRequest(url string, body interface{}) (interface{}, error) {
-	res, err := s.Client.Post(url, body, nil)
-	return res, err
+func (s *RequestService) SetAccessToken(accessToken string) {
+	s.accessToken = accessToken
 }
 
-func (s RequestService) GetRequest(url string, query map[string]string) (interface{}, error) {
-	var queryStr string = ""
-
-	for k, v := range query {
-		if queryStr == "" {
-			queryStr = queryStr + k + "=" + v
-		} else {
-			queryStr = queryStr + "&" + k + "=" + v
-		}
+func (s *RequestService) PostRequest(url string, body interface{}) (Output, error) {
+	var content ContentOutput
+	res, err := s.client.Post(url, body, http.Header{"x-qbit-access-token": []string{s.accessToken}})
+	if err != nil {
+		return Output{
+			Status:  res.Status,
+			Reason:  res.Reason,
+			Content: ContentOutput{},
+		}, nil
 	}
 
-	if queryStr != "" {
-		queryStr = "?" + queryStr
+	err = json.Unmarshal([]byte(res.Content), &content)
+	if err != nil {
+		return Output{
+			Status:  res.Status,
+			Reason:  res.Reason,
+			Content: ContentOutput{},
+		}, err
 	}
-	
-	res, err := s.Client.Get(url+queryStr, nil)
-	return res, err
+	return Output{
+		Status:  res.Status,
+		Reason:  res.Reason,
+		Content: content,
+	}, nil
 }
 
-func (s RequestService) DeleteRequest(url string, body interface{}) (interface{}, error) {
-	res, err := s.Client.Delete(url, body, nil)
-	return res, err
+func (s *RequestService) GetRequest(url string, query map[string]interface{}) (Output, error) {
+	var content ContentOutput
+	res, err := s.client.Get(url, query, http.Header{"x-qbit-access-token": []string{s.accessToken}})
+	if err != nil {
+		return Output{
+			Status:  res.Status,
+			Reason:  res.Reason,
+			Content: ContentOutput{},
+		}, nil
+	}
+
+	err = json.Unmarshal([]byte(res.Content), &content)
+	if err != nil {
+		return Output{
+			Status:  res.Status,
+			Reason:  res.Reason,
+			Content: ContentOutput{},
+		}, err
+	}
+	return Output{
+		Status:  res.Status,
+		Reason:  res.Reason,
+		Content: content,
+	}, nil
 }
 
-func (s RequestService) PutRequest(url string, body interface{}) (interface{}, error) {
-	res, err := s.Client.Put(url, body, nil)
-	return res, err
+func (s *RequestService) DeleteRequest(url string, body interface{}) (Output, error) {
+	var content ContentOutput
+	res, err := s.client.Delete(url, body, http.Header{"x-qbit-access-token": []string{s.accessToken}})
+	if err != nil {
+		return Output{
+			Status:  res.Status,
+			Reason:  res.Reason,
+			Content: ContentOutput{},
+		}, nil
+	}
+
+	err = json.Unmarshal([]byte(res.Content), &content)
+	if err != nil {
+		return Output{
+			Status:  res.Status,
+			Reason:  res.Reason,
+			Content: ContentOutput{},
+		}, err
+	}
+	return Output{
+		Status:  res.Status,
+		Reason:  res.Reason,
+		Content: content,
+	}, nil
+}
+
+func (s *RequestService) PutRequest(url string, body interface{}) (Output, error) {
+	var content ContentOutput
+	res, err := s.client.Put(url, body, http.Header{"x-qbit-access-token": []string{s.accessToken}})
+	if err != nil {
+		return Output{
+			Status:  res.Status,
+			Reason:  res.Reason,
+			Content: ContentOutput{},
+		}, nil
+	}
+
+	err = json.Unmarshal([]byte(res.Content), &content)
+	if err != nil {
+		return Output{
+			Status:  res.Status,
+			Reason:  res.Reason,
+			Content: ContentOutput{},
+		}, err
+	}
+	return Output{
+		Status:  res.Status,
+		Reason:  res.Reason,
+		Content: content,
+	}, nil
 }
